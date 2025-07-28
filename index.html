@@ -1,0 +1,208 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Construction Data Analytics Dashboard</title>
+    <link href="style.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <header class="header">
+            <h1>Construction Data Analytics Dashboard</h1>
+            <p>Upload CSV files untuk analisis data konstruksi dan prediksi delay</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-card">
+                <h3>Upload Forms Data</h3>
+                <input type="file" id="formsFile" accept=".csv" />
+                <div class="file-info" id="formsInfo"></div>
+            </div>
+            <div class="upload-card">
+                <h3>Upload Tasks Data</h3>
+                <input type="file" id="tasksFile" accept=".csv" />
+                <div class="file-info" id="tasksInfo"></div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button id="analyzeBtn" disabled>Analyze Data</button>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="projectFilter">Project:</label>
+                <select id="projectFilter">
+                    <option value="">All Projects</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="statusFilter">Status:</label>
+                <select id="statusFilter">
+                    <option value="">All Status</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="typeFilter">Type:</label>
+                <select id="typeFilter">
+                    <option value="">All Types</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h3>📋 Summary Statistics</h3>
+                <div id="summaryStats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Forms:</span>
+                        <span class="stat-value" id="totalForms">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Tasks:</span>
+                        <span class="stat-value" id="totalTasks">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Open Items:</span>
+                        <span class="stat-value" id="openItems">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Overdue Items:</span>
+                        <span class="stat-value" id="overdueItems">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🥧 Status Distribution</h3>
+                <canvas id="statusChart"></canvas>
+            </div>
+
+            <div class="card">
+                <h3>📈 Project Timeline</h3>
+                <canvas id="timelineChart"></canvas>
+            </div>
+
+            <div class="card">
+                <h3>🏆 Top Open Types</h3>
+                <div id="topOpenStatus"></div>
+            </div>
+
+            <div class="card">
+                <h3>📊 Tasks Per Year</h3>
+                <canvas id="tasksPerYearChart"></canvas>
+            </div>
+
+            <div class="card">
+                <h3>⚡ Performance Metrics</h3>
+                <div id="performanceMetrics">
+                    <div class="metric-item">
+                        <span class="metric-label">📈 Completion Rate:</span>
+                        <span class="metric-value" id="completionRate">0%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">⏱️ Avg. Task Duration:</span>
+                        <span class="metric-value" id="avgDuration">0 days</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">🚨 Overdue Rate:</span>
+                        <span class="metric-value" id="overdueRate">0%</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">🎯 On-Time Delivery:</span>
+                        <span class="metric-value" id="onTimeRate">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📅 Project Timeline Overview</h3>
+                <canvas id="projectTimelineChart"></canvas>
+            </div>
+
+            <div class="card">
+                <h3>🔥 Delay Prediction Results</h3>
+                <div id="predictionResults">
+                    <p style="text-align: center; color: #666; font-style: italic;">🚀 Use the prediction form below to analyze delay risk for new tasks</p>
+                </div>
+            </div>
+
+            <div class="card predict-task-center">
+                <h3>🎯 Predict New Task</h3>
+                <div class="task-input-form">
+                    <div id="taskRefDisplay" style="display: none;"></div>
+                    <div class="form-group">
+                        <label for="taskProject">Project:</label>
+                        <select id="taskProject">
+                            <option value="">Select Project</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskType">Task Type:</label>
+                        <select id="taskType">
+                            <option value="">Select Task Type</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskTarget">Target Date:</label>
+                        <input type="date" id="taskTarget" />
+                    </div>
+                    <div class="form-group">
+                        <label for="taskPriority">Priority:</label>
+                        <select id="taskPriority">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="taskHasImages" />
+                            Has Images/Documentation
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="taskHasComments" />
+                            Has Comments/Notes
+                        </label>
+                    </div>
+                    <button id="predictSingleTask" class="predict-btn">Predict Delay Risk</button>
+                    <div id="singleTaskPrediction"></div>
+                </div>
+            </div></div>
+
+            <div class="card">
+                <h3>⚠️ Risk Analysis</h3>
+                <canvas id="riskChart"></canvas>
+            </div>
+        </div>
+
+        <div class="data-table-section">
+            <h3>📊 Filtered Data</h3>
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>Ref</th>
+                            <th>Status</th>
+                            <th>Type</th>
+                            <th>Project</th>
+                            <th>Created</th>
+                            <th>Target</th>
+                            <th>Overdue</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
