@@ -55,6 +55,7 @@
         </div>
 
         <div class="dashboard-grid">
+            <!-- Row 1: Summary Statistics & Status Distribution -->
             <div class="card">
                 <h3>📋 Summary Statistics</h3>
                 <div id="summaryStats">
@@ -82,11 +83,13 @@
                 <canvas id="statusChart"></canvas>
             </div>
 
-            <div class="card">
+            <!-- Row 2: Project Timeline (Full Width) -->
+            <div class="card grid-row-full">
                 <h3>📈 Project Timeline</h3>
                 <canvas id="timelineChart"></canvas>
             </div>
 
+            <!-- Row 3: Top Open Types & Tasks Per Year -->
             <div class="card">
                 <h3>🏆 Top Open Types</h3>
                 <div id="topOpenStatus"></div>
@@ -97,6 +100,7 @@
                 <canvas id="tasksPerYearChart"></canvas>
             </div>
 
+            <!-- Row 4: Performance Metrics & Risk Analysis -->
             <div class="card">
                 <h3>⚡ Performance Metrics</h3>
                 <div id="performanceMetrics">
@@ -120,18 +124,12 @@
             </div>
 
             <div class="card">
-                <h3>📅 Project Timeline Overview</h3>
-                <canvas id="projectTimelineChart"></canvas>
+                <h3>⚠️ Risk Analysis</h3>
+                <canvas id="riskChart"></canvas>
             </div>
 
+            <!-- Row 5: Predict New Task & Delay Prediction Results -->
             <div class="card">
-                <h3>🔥 Delay Prediction Results</h3>
-                <div id="predictionResults">
-                    <p style="text-align: center; color: #666; font-style: italic;">🚀 Use the prediction form below to analyze delay risk for new tasks</p>
-                </div>
-            </div>
-
-            <div class="card predict-task-center">
                 <h3>🎯 Predict New Task</h3>
                 <div class="task-input-form">
                     <div id="taskRefDisplay" style="display: none;"></div>
@@ -174,11 +172,13 @@
                     <button id="predictSingleTask" class="predict-btn">Predict Delay Risk</button>
                     <div id="singleTaskPrediction"></div>
                 </div>
-            </div></div>
+            </div>
 
             <div class="card">
-                <h3>⚠️ Risk Analysis</h3>
-                <canvas id="riskChart"></canvas>
+                <h3>🔥 Delay Prediction Results</h3>
+                <div id="predictionResults">
+                    <p style="text-align: center; color: #666; font-style: italic;">🚀 Use the prediction form to analyze delay risk for new tasks</p>
+                </div>
             </div>
         </div>
 
