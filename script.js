@@ -43,12 +43,32 @@ class ConstructionAnalytics {
             type: 'line',
             data: {
                 labels: [],
-                datasets: [{
-                    label: 'Items Created',
-                    data: [],
-                    borderColor: '#4299e1',
-                    tension: 0.1
-                }]
+                datasets: [
+                    {
+                        label: 'Total Created',
+                        data: [],
+                        borderColor: '#4299e1',
+                        backgroundColor: 'rgba(66, 153, 225, 0.1)',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    {
+                        label: 'Delayed Items',
+                        data: [],
+                        borderColor: '#e53e3e',
+                        backgroundColor: 'rgba(229, 62, 62, 0.1)',
+                        tension: 0.4,
+                        fill: false
+                    },
+                    {
+                        label: 'On-Time Items',
+                        data: [],
+                        borderColor: '#38a169',
+                        backgroundColor: 'rgba(56, 161, 105, 0.1)',
+                        tension: 0.4,
+                        fill: false
+                    }
+                ]
             },
             options: {
                 responsive: true,
@@ -57,51 +77,41 @@ class ConstructionAnalytics {
                     y: {
                         beginAtZero: true
                     }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 }
             }
         });
 
         this.riskChart = new Chart(document.getElementById('riskChart'), {
-            type: 'bar',
+            type: 'pie',
             data: {
                 labels: ['Low Risk', 'Medium Risk', 'High Risk'],
                 datasets: [{
-                    label: 'Items Count',
                     data: [0, 0, 0],
                     backgroundColor: ['#38a169', '#dd6b20', '#e53e3e']
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+                maintainAspectRatio: false
             }
         });
 
         this.tasksPerYearChart = new Chart(document.getElementById('tasksPerYearChart'), {
-            type: 'bar',
+            type: 'pie',
             data: {
                 labels: [],
                 datasets: [{
-                    label: 'Tasks Count',
                     data: [],
-                    backgroundColor: '#4299e1',
-                    borderColor: '#3182ce',
-                    borderWidth: 1
+                    backgroundColor: ['#4299e1', '#38a169', '#dd6b20', '#e53e3e', '#805ad5', '#f6ad55', '#68d391']
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
+                maintainAspectRatio: false
             }
         });
     }
@@ -405,12 +415,21 @@ class ConstructionAnalytics {
         this.statusChart.data.datasets[0].data = Object.values(statusCounts);
         this.statusChart.update();
 
-        // Timeline chart
+        // Timeline chart with multiple curves
         const timelineCounts = {};
+        const delayedCounts = {};
+        const onTimeCounts = {};
+
         this.processedData.forEach(item => {
             if (item.Created) {
                 const monthYear = `${item.Created.getMonth() + 1}/${item.Created.getFullYear()}`;
                 timelineCounts[monthYear] = (timelineCounts[monthYear] || 0) + 1;
+                
+                if (item.OverDue) {
+                    delayedCounts[monthYear] = (delayedCounts[monthYear] || 0) + 1;
+                } else {
+                    onTimeCounts[monthYear] = (onTimeCounts[monthYear] || 0) + 1;
+                }
             }
         });
 
@@ -420,8 +439,12 @@ class ConstructionAnalytics {
             return yearA - yearB || monthA - monthB;
         });
 
-        this.timelineChart.data.labels = sortedTimeline.map(([date]) => date);
-        this.timelineChart.data.datasets[0].data = sortedTimeline.map(([, count]) => count);
+        const labels = sortedTimeline.map(([date]) => date);
+        
+        this.timelineChart.data.labels = labels;
+        this.timelineChart.data.datasets[0].data = labels.map(label => timelineCounts[label] || 0);
+        this.timelineChart.data.datasets[1].data = labels.map(label => delayedCounts[label] || 0);
+        this.timelineChart.data.datasets[2].data = labels.map(label => onTimeCounts[label] || 0);
         this.timelineChart.update();
     }
 
@@ -649,17 +672,17 @@ class ConstructionAnalytics {
             .sort((a, b) => b.delayProbability - a.delayProbability)
             .slice(0, 10); // Show top 10 at-risk items
 
-        let html = '<h4>Top 10 Items at Risk of Delay:</h4>';
+        let html = '<h4 style="color: #000000; margin-bottom: 15px;">Top 10 Items at Risk of Delay:</h4>';
 
         sortedPredictions.forEach(pred => {
             const riskClass = `risk-${pred.riskLevel}`;
             const percentage = (pred.delayProbability * 100).toFixed(1);
 
             html += `
-                <div class="prediction-item ${riskClass}">
+                <div class="prediction-item ${riskClass}" style="color: #000000;">
                     <strong>${pred.item.Ref}</strong> - ${pred.item.Status}
                     <br>
-                    <small>${pred.item.Type || 'N/A'} | Delay Risk: ${percentage}%</small>
+                    <small style="color: #333333;">${pred.item.Type || 'N/A'} | Delay Risk: ${percentage}%</small>
                 </div>
             `;
         });
@@ -815,6 +838,7 @@ class ConstructionAnalytics {
     displaySingleTaskPrediction(prediction, taskRef, taskProject) {
         const container = document.getElementById('singleTaskPrediction');
         const percentage = (prediction.delayProbability * 100).toFixed(1);
+        const taskType = document.getElementById('taskType').value;
 
         let riskMessage = '';
         let recommendations = '';
@@ -853,9 +877,10 @@ class ConstructionAnalytics {
 
         container.innerHTML = `
             <div class="prediction-result ${prediction.riskLevel}-risk">
-                <h4>${taskRef} - ${taskProject}</h4>
+                <h4>Potensi Delay: ${taskType}</h4>
+                <p><strong>Project:</strong> ${taskProject}</p>
                 <p>${riskMessage}</p>
-                <div style="text-align: left; margin-top: 10px; font-size: 14px;">
+                <div style="text-align: left; margin-top: 10px; font-size: 14px; color: inherit;">
                     ${recommendations}
                 </div>
             </div>
