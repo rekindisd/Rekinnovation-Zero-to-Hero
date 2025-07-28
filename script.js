@@ -272,6 +272,7 @@ class ConstructionAnalytics {
         this.processedData = [...this.formsData, ...this.tasksData];
 
         this.updateSummaryStats();
+        this.updatePerformanceMetrics();
         this.updateFilters();
         this.updateCharts();
         this.updateTasksPerYearChart();
@@ -524,6 +525,9 @@ class ConstructionAnalytics {
 
         // Update summary stats with filtered data
         this.updateSummaryStats(filteredData);
+
+        // Update performance metrics with filtered data
+        this.updatePerformanceMetrics(filteredData);
 
         // Update top open status with filtered data
         this.updateTopOpenStatus(filteredData);
