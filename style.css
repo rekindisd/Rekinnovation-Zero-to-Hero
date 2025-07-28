@@ -218,7 +218,7 @@ body {
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    grid-template-columns: 1fr 1fr;
     gap: 30px;
     margin-bottom: 40px;
 }
@@ -692,7 +692,8 @@ canvas {
     }
 
     .dashboard-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
     }
 
     .filters {
@@ -701,5 +702,13 @@ canvas {
 
     .header h1 {
         font-size: 2rem;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .card h3 {
+        font-size: 1.2rem;
     }
 }
